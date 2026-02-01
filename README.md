@@ -27,7 +27,9 @@ MongoDB Atlas as cloud database.
 - **Backend:** Node.js, Express.js, JWT, REST API, Multer, MVC Pattern  
 - **Database:** MongoDB Atlas  
 
-**📁 Project Structure**
+**## 📁 Project Structure**
+
+```bash
 mern-institute-project/
 │
 ├── frontend/
@@ -41,11 +43,13 @@ mern-institute-project/
 │   ├── routes/
 │   ├── middleware/
 │   ├── uploads/
-│   └── server.js
+│   ├── server.js
+│   └── package.json
 │
 ├── .gitignore
 ├── README.md
 └── package.json
+
 
 **Installation & Setup**
 **1️⃣ Clone Repository**
