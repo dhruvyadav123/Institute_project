@@ -11,7 +11,7 @@ const admissionRoutes = require("./routes/admissionRoutes");
 const app = express();
 
 app.use(cors({
-  origin: true,
+  origin: "https://your-frontend-url.vercel.app",
   credentials: true
 }));
 
