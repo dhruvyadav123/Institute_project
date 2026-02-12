@@ -36,7 +36,7 @@ export default function AdminDashboard() {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/admin/stats", {
+      const res = await axios.get("http://localhost:5000/api/admin/analytics", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setStats(res.data);
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
 
   const loadAdmissions = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admission/all", {
+      const res = await axios.get("http://localhost:5000/api/admin/admissions", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAdmissions(res.data);
@@ -63,7 +63,14 @@ export default function AdminDashboard() {
       const res = await axios.get("http://localhost:5000/api/admin/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(res.data.map(u => ({ name: u.name, email: u.email, role: u.role, _id: u._id })));
+      setUsers(
+        res.data.map((u) => ({
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          _id: u._id,
+        }))
+      );
     } catch (error) {
       console.error("Failed to load users:", error);
     }
@@ -84,7 +91,7 @@ export default function AdminDashboard() {
   const updateStatus = async (id, status) => {
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/admission/${id}/status`,
+        `http://localhost:5000/api/admin/admissions/${id}/status`,
         { admissionStatus: status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -98,29 +105,37 @@ export default function AdminDashboard() {
   };
 
   const downloadPDF = async (id) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/api/admission/letter/${id}`,
-        { responseType: "blob", headers: { Authorization: `Bearer ${token}` } }
-      );
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "admission.pdf");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      console.error(error.response || error);
-      alert("PDF download failed");
-    }
-  };
+  try {
+    const response = await axios.get(
+      `http://localhost:5000/api/admin/admissions/${id}/download`,
+      {
+        responseType: "blob",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "admission.pdf");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    console.error(error);
+    alert("Admin PDF download failed");
+  }
+};
+
 
   const logout = () => {
     localStorage.removeItem("token");
     window.location.href = "/login";
   };
 
+  // ===== Dashboard Chart Data =====
   const data = [
     { name: "Users", value: stats.totalUsers || 0 },
     { name: "Admissions", value: stats.totalAdmissions || 0 },
@@ -128,7 +143,6 @@ export default function AdminDashboard() {
     { name: "Pending", value: stats.pending || 0 },
   ];
 
-  
   const cardColors = [
     "from-pink-400 to-pink-500",
     "from-indigo-400 to-indigo-500",
@@ -136,6 +150,7 @@ export default function AdminDashboard() {
     "from-yellow-400 to-yellow-500",
   ];
 
+  // ===== RENDER =====
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
       {/* Sidebar */}
