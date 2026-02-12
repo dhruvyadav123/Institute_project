@@ -1,45 +1,32 @@
-const express = require("express");
-const router = express.Router();
-const multer = require("multer");
-const auth = require("../middleware/auth");
+const router = require("express").Router();
+const { verifyToken } = require("../middleware/auth");
+const upload = require("../middleware/multer");
 const {
   applyAdmission,
-  getAdmissions,
-  updateStatus,
-  generatePDF,
   getMyAdmission,
+  generatePDF
 } = require("../controllers/admissionController");
 
-// ===== MULTER CONFIG =====
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + file.originalname);
-  },
-});
-const upload = multer({ storage });
-
-// ===== USER ROUTES =====
+// APPLY ADMISSION
 router.post(
-  "/apply",
-  auth,
+  "/",
+  verifyToken,
   upload.fields([
-    { name: "tenthMarksheet" },
-    { name: "twelfthMarksheet" },
-    { name: "idProof" },
+    { name: "tenthMarksheet", maxCount: 1 },
+    { name: "twelfthMarksheet", maxCount: 1 },
+    { name: "idProof", maxCount: 1 }
   ]),
   applyAdmission
 );
-router.get("/my", auth, getMyAdmission);
 
-// ===== ADMIN ROUTES =====
-router.get("/all", auth, getAdmissions);
-router.put("/:id", auth, updateStatus);
+// GET MY ADMISSION
+router.get("/my", verifyToken, getMyAdmission);
 
-// ===== PDF ROUTE =====
-router.get("/letter/:id", auth, generatePDF);
+// ✅ USER PDF DOWNLOAD (FIX)
+router.get(
+  "/letter/:id",
+  verifyToken,
+  generatePDF
+);
 
 module.exports = router;

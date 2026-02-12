@@ -1,6 +1,7 @@
 const Admission = require("../models/Admission");
 const PDFDocument = require("pdfkit");
 
+
 /* APPLY ADMISSION */
 exports.applyAdmission = async (req, res) => {
   try {

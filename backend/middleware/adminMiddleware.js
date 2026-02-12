@@ -16,7 +16,6 @@ const verifyAdmin = (req, res, next) => {
       return res.status(403).json({ message: "Admin access denied" });
     }
 
-    req.admin = decoded;
     next();
   } catch (error) {
     return res.status(401).json({ message: "Invalid token" });
