@@ -1,189 +1,243 @@
-import React, { useEffect, useState } from "react";
+// pages/UserDashboard.jsx
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { FaUserCircle, FaFilePdf } from "react-icons/fa";
 
-const UserDashboard = () => {
-  const [admission, setAdmission] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
+export default function UserDashboard() {
   const token = localStorage.getItem("token");
 
+  const [user, setUser] = useState({ name: "", email: "" });
+  const [admission, setAdmission] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Form state
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    course: "",
+  });
+
+  const [files, setFiles] = useState({
+    tenthMarksheet: null,
+    twelfthMarksheet: null,
+    idProof: null,
+  });
+
+  const [step, setStep] = useState(1);
+
   useEffect(() => {
-    if (!token) {
-      setError("User not logged in");
-      setLoading(false);
-      return;
-    }
+    loadUserProfile();
+    loadMyAdmission();
+  }, []);
 
-    const fetchAdmission = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/api/admission/my",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setAdmission(res.data);
-      } catch (err) {
-        setError(
-          err.response?.data?.message || "Failed to load admission data"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAdmission();
-  }, [token]);
-
-  const downloadPDF = async () => {
+  // ===== Load User Profile =====
+  const loadUserProfile = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/admission/letter/${admission._id}`,
-        {
-          responseType: "blob",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "admission_letter.pdf");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch {
-      alert("Admission not approved yet");
+      const res = await axios.get("http://localhost:5000/api/user/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res.data);
+      setFormData({
+        ...formData,
+        name: res.data.name,
+        email: res.data.email,
+      });
+    } catch (error) {
+      console.error("Failed to load profile:", error);
     }
   };
 
-  /* ================= STATES ================= */
+  // ===== Load My Admission =====
+  const loadMyAdmission = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/admission/my", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAdmission(res.data);
+    } catch (error) {
+      console.error("Failed to load admission:", error);
+    }
+  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-xl text-red-900">
-        Loading dashboard...
-      </div>
-    );
-  }
+  // ===== Handle Form Input =====
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-600 text-lg">
-        {error}
-      </div>
-    );
-  }
+  const handleFileChange = (e) => {
+    setFiles({ ...files, [e.target.name]: e.target.files[0] });
+  };
 
-  if (!admission) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
-        No admission data found
-      </div>
-    );
-  }
+  // ===== Submit Admission =====
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const form = new FormData();
+      form.append("name", formData.name);
+      form.append("email", formData.email);
+      form.append("phone", formData.phone);
+      form.append("course", formData.course);
+      if (files.tenthMarksheet) form.append("tenthMarksheet", files.tenthMarksheet);
+      if (files.twelfthMarksheet) form.append("twelfthMarksheet", files.twelfthMarksheet);
+      if (files.idProof) form.append("idProof", files.idProof);
 
-  /* ================= UI ================= */
+      const res = await axios.post("http://localhost:5000/api/admission", form, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+      });
+
+      alert(res.data.message || "Admission applied successfully!");
+      loadMyAdmission();
+      setStep(2);
+    } catch (error) {
+      console.error(error.response || error);
+      alert("Failed to apply admission");
+    }
+  };
+
+  // ===== Download Admission PDF =====
+  const downloadPDF = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/admission/${admission._id}/download`,
+        { responseType: "blob", headers: { Authorization: `Bearer ${token}` } }
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "admission.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error(error.response || error);
+      alert("PDF download failed");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-red-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-6 font-sans">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">👋 Welcome, {user.name}</h1>
 
-      {/* ===== HEADER ===== */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-red-900">
-            👤 User Dashboard
-          </h1>
-          <p className="text-red-700 mt-1">
-            Welcome, <b>{admission.name}</b>
-          </p>
-        </div>
-
-        <span
-          className={`mt-4 md:mt-0 px-5 py-2 rounded-full text-sm font-semibold
-            ${
-              admission.admissionStatus === "Approved"
-                ? "bg-green-100 text-green-800"
-                : admission.admissionStatus === "Rejected"
-                ? "bg-red-200 text-red-800"
-                : "bg-yellow-100 text-yellow-800"
-            }`}
-        >
-          {admission.admissionStatus}
-        </span>
-      </div>
-
-      {/* ===== CARDS ===== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        <Card title="🎓 Admission" value={admission.admissionStatus} />
-        <Card title="📘 Course" value={admission.course} />
-        <Card title="💰 Payment" value={admission.paymentStatus} />
-        <Card
-          title="📄 Documents"
-          value={
-            admission.documents &&
-            (admission.documents.tenthMarksheet ||
-              admission.documents.twelfthMarksheet ||
-              admission.documents.idProof)
-              ? "Uploaded"
-              : "Pending"
-          }
-        />
-      </div>
-
-      {/* ===== DETAILS ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* PROFILE INFO */}
-        <div className="bg-white rounded-xl shadow p-6 space-y-2">
-          <h2 className="font-bold text-lg mb-3 text-red-900">
-            👤 Profile Information
-          </h2>
-          <p><b>Name:</b> {admission.name}</p>
-          <p><b>Email:</b> {admission.email}</p>
-          <p><b>Phone:</b> {admission.phone}</p>
-          <p><b>Address:</b> {admission.address}</p>
-          <p><b>Course:</b> {admission.course}</p>
-        </div>
-
-        {/* TIMELINE */}
-        <div className="bg-white rounded-xl shadow p-6 lg:col-span-2">
-          <h2 className="font-bold text-lg mb-4 text-red-900">
-            📌 Admission Timeline
-          </h2>
-
-          <ul className="space-y-3 text-red-900">
-            <li>📝 Form Submitted: {new Date(admission.createdAt).toLocaleDateString()}</li>
-            <li>📄 Documents: {admission.documents ? "Uploaded" : "Pending"}</li>
-            <li>💳 Payment: <b>{admission.paymentStatus}</b></li>
-            <li>✅ Status: <b>{admission.admissionStatus}</b></li>
-          </ul>
-
-          {admission.admissionStatus === "Approved" && (
-            <button
-              onClick={downloadPDF}
-              className="mt-6 w-full md:w-auto px-6 py-3 bg-red-900 text-white rounded-lg hover:bg-red-800 transition"
+      {admission ? (
+        // ===== My Admission Info =====
+        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+          <h2 className="text-xl font-bold text-gray-700">🎓 My Admission</h2>
+          <p><strong>Name:</strong> {admission.name}</p>
+          <p><strong>Email:</strong> {admission.email}</p>
+          <p><strong>Phone:</strong> {admission.phone}</p>
+          <p><strong>Course:</strong> {admission.course}</p>
+          <p>
+            <strong>Status:</strong>{" "}
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                admission.admissionStatus === "Approved"
+                  ? "bg-green-100 text-green-700"
+                  : admission.admissionStatus === "Rejected"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-yellow-100 text-yellow-700"
+              }`}
             >
-              📄 Download Admission Letter
-            </button>
-          )}
+              {admission.admissionStatus || "Pending"}
+            </span>
+          </p>
+          <button
+            onClick={downloadPDF}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <FaFilePdf /> Download PDF
+          </button>
         </div>
-      </div>
+      ) : (
+        // ===== Apply Admission Form =====
+        <div className="bg-white rounded-2xl shadow-lg p-6 max-w-2xl mx-auto">
+          <h2 className="text-xl font-bold mb-4 text-gray-700">📝 Apply Admission</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block mb-1">Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full border p-2 rounded-lg"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full border p-2 rounded-lg"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Phone</label>
+              <input
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full border p-2 rounded-lg"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Course</label>
+              <input
+                type="text"
+                name="course"
+                value={formData.course}
+                onChange={handleChange}
+                className="w-full border p-2 rounded-lg"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1">10th Marksheet</label>
+              <input
+                type="file"
+                name="tenthMarksheet"
+                onChange={handleFileChange}
+                className="w-full"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-1">12th Marksheet</label>
+              <input
+                type="file"
+                name="twelfthMarksheet"
+                onChange={handleFileChange}
+                className="w-full"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-1">ID Proof</label>
+              <input
+                type="file"
+                name="idProof"
+                onChange={handleFileChange}
+                className="w-full"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Submit Admission
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
-};
-
-/* ===== CARD COMPONENT ===== */
-const Card = ({ title, value }) => (
-  <div className="bg-white rounded-xl shadow p-5 hover:shadow-lg transition">
-    <h3 className="text-red-900 font-semibold">{title}</h3>
-    <p className="mt-3 text-xl font-bold text-red-900">{value}</p>
-  </div>
-);
-
-export default UserDashboard;
+}
