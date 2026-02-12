@@ -31,14 +31,24 @@ exports.toggleStatus = async (req, res) => {
 
 // ===== Download PDF =====
 exports.downloadAdmissionPDF = async (req, res) => {
-  const { id } = req.params;
-  const filePath = path.join(__dirname, "..", "files", `${id}.pdf`);
-  if (fs.existsSync(filePath)) {
-    res.download(filePath, "admission.pdf");
-  } else {
-    res.status(404).json({ message: "PDF not found" });
+  const admission = await Admission.findById(req.params.id);
+
+  if (!admission) {
+    return res.status(404).json({ message: "Admission not found" });
   }
+
+  const filePath = path.join(
+    __dirname,
+    `../uploads/admission_${admission._id}.pdf`
+  );
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ message: "PDF not generated yet" });
+  }
+
+  res.download(filePath);
 };
+
 
 // ===== Analytics / Stats =====
 exports.getAnalytics = async (req, res) => {

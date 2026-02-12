@@ -27,6 +27,7 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
+  
 
   /*  ADMIN LOGIN */
   if (email === process.env.ADMIN_EMAIL) {
@@ -63,3 +64,5 @@ exports.login = async (req, res) => {
 
   res.json({ token, role: user.role });
 };
+
+
