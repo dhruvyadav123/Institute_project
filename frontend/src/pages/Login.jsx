@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../services/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const Login = () => {
   try {
     // Send request to backend to update admission status
     await axios.put(
-      `http://localhost:5000/api/admission/${admissionId}`,
+      `${API_BASE_URL}/admission/${admissionId}`,
       { status: "Approved" },
       {
         headers: {
@@ -43,7 +44,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", form);
+      const res = await axios.post(`${API_BASE_URL}/auth/login`, form);
 
       // Save token and role
       localStorage.setItem("token", res.data.token);

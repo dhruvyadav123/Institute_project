@@ -10,8 +10,32 @@ const admissionRoutes = require("./routes/admissionRoutes");
 
 const app = express();
 
+const defaultAllowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174"
+];
+
+const allowedOrigins = [
+  ...new Set([
+    ...defaultAllowedOrigins,
+    ...[process.env.CORS_ORIGINS, process.env.FRONTEND_URL]
+      .filter(Boolean)
+      .flatMap((value) => value.split(","))
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+  ])
+];
+
 app.use(cors({
-  origin: "https://your-frontend-url.vercel.app",
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true
 }));
 
@@ -27,6 +51,7 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/admission", admissionRoutes);
 app.use("/api/admin", adminRoutes); // ✅ IMPORTANT LINE
+
 
 app.get("/", (req, res) => {
   res.send("MERN Backend is Live 🚀");

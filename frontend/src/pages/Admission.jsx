@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../services/api";
 
 const Admission = () => {
   const [step, setStep] = useState(1);
@@ -40,7 +41,7 @@ const Admission = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/admission/",
+        `${API_BASE_URL}/admission/`,
         data,
         {
           headers: {
@@ -73,7 +74,7 @@ const Admission = () => {
   const downloadPDF = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/admission/letter/${admissionId}`,
+        `${API_BASE_URL}/admission/letter/${admissionId}`,
         {
           responseType: "blob",
           headers: {

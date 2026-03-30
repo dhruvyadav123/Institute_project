@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const Admission = require("../models/Admission");
-const fs = require("fs");
-const path = require("path");
+const { pipeAdmissionPdf } = require("../utils/admissionPdf");
 
 // ===== Users =====
 exports.getUsers = async (req, res) => {
@@ -25,7 +24,16 @@ exports.getAllAdmissions = async (req, res) => {
 exports.toggleStatus = async (req, res) => {
   const { id } = req.params;
   const { admissionStatus } = req.body;
-  const admission = await Admission.findByIdAndUpdate(id, { admissionStatus }, { new: true });
+  const update = {
+    admissionStatus,
+    approvedAt: admissionStatus === "Approved" ? new Date() : null,
+  };
+
+  if (admissionStatus === "Approved") {
+    update.paymentStatus = "Paid";
+  }
+
+  const admission = await Admission.findByIdAndUpdate(id, update, { new: true });
   res.json({ message: `Admission ${admissionStatus}`, admission });
 };
 
@@ -37,16 +45,19 @@ exports.downloadAdmissionPDF = async (req, res) => {
     return res.status(404).json({ message: "Admission not found" });
   }
 
-  const filePath = path.join(
-    __dirname,
-    `../uploads/admission_${admission._id}.pdf`
-  );
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ message: "PDF not generated yet" });
-  }
-
-  res.download(filePath);
+  pipeAdmissionPdf(res, admission, {
+    institutionName: "Global Tech Institute",
+    title:
+      admission.admissionStatus === "Approved"
+        ? "Official Admission Letter"
+        : "Admission Status Report",
+    subtitle: "Admin Download Copy | Global Tech Institute",
+    bodyIntro:
+      admission.admissionStatus === "Approved"
+        ? `This certified copy confirms that ${admission.name || "the student"} has been admitted to ${admission.course || "the selected program"} at Global Tech Institute.`
+        : `This report summarizes the current admission status, submitted details, and verification records for ${admission.name || "the student"}.`,
+    note: "Use this summary while reviewing documents, course choice, and approval status.",
+  });
 };
 
 
