@@ -10,27 +10,49 @@ const admissionRoutes = require("./routes/admissionRoutes");
 
 const app = express();
 
+const normalizeOrigin = (origin = "") => origin.trim().replace(/\/$/, "");
+
 const defaultAllowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174"
-];
+].map(normalizeOrigin);
 
-const allowedOrigins = [
-  ...new Set([
+const allowedOrigins = new Set([
     ...defaultAllowedOrigins,
     ...[process.env.CORS_ORIGINS, process.env.FRONTEND_URL]
       .filter(Boolean)
       .flatMap((value) => value.split(","))
-      .map((origin) => origin.trim())
+      .map(normalizeOrigin)
       .filter(Boolean)
-  ])
-];
+]);
+
+const previewHostSuffixes = [".vercel.app", ".netlify.app", ".onrender.com"];
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+
+  const normalizedOrigin = normalizeOrigin(origin);
+
+  if (allowedOrigins.has(normalizedOrigin)) {
+    return true;
+  }
+
+  try {
+    const { hostname, protocol } = new URL(normalizedOrigin);
+    return (
+      protocol === "https:" &&
+      previewHostSuffixes.some((suffix) => hostname.endsWith(suffix))
+    );
+  } catch {
+    return false;
+  }
+};
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
 

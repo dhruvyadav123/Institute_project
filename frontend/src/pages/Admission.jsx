@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { API_BASE_URL } from "../services/api";
+import { buildApiUrl } from "../services/api";
 
 const Admission = () => {
   const [step, setStep] = useState(1);
@@ -41,7 +41,7 @@ const Admission = () => {
 
     try {
       const res = await axios.post(
-        `${API_BASE_URL}/admission/`,
+        buildApiUrl("/admission"),
         data,
         {
           headers: {
@@ -74,7 +74,7 @@ const Admission = () => {
   const downloadPDF = async () => {
     try {
       const res = await axios.get(
-        `${API_BASE_URL}/admission/letter/${admissionId}`,
+        buildApiUrl(`/admission/letter/${admissionId}`),
         {
           responseType: "blob",
           headers: {

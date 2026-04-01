@@ -65,4 +65,27 @@ exports.login = async (req, res) => {
   res.json({ token, role: user.role });
 };
 
+exports.getMe = async (req, res) => {
+  try {
+    if (req.user.role === "admin") {
+      return res.json({
+        name: process.env.ADMIN_NAME || "Admin",
+        email: process.env.ADMIN_EMAIL || "",
+        role: "admin",
+      });
+    }
+
+    const user = await User.findById(req.user.id).select("_id name email role");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.json(user);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to load user profile" });
+  }
+};
+
 
