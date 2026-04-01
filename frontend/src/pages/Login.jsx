@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { buildApiUrl } from "../services/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,38 +13,11 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handlePayment = async () => {
-  if (!paymentMethod) {
-    alert("Please select a payment method");
-    return;
-  }
-
-  try {
-    // Send request to backend to update admission status
-    await axios.put(
-      `http://localhost:5000/api/admission/${admissionId}`,
-      { status: "Approved" },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-
-    alert(`Payment successful via ${paymentMethod}`);
-    setStep(3); // Move to PDF download step
-  } catch (err) {
-    console.error(err);
-    alert("Payment failed. Please try again.");
-  }
-};
-
-
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", form);
+      const res = await axios.post(buildApiUrl("/auth/login"), form);
 
       // Save token and role
       localStorage.setItem("token", res.data.token);

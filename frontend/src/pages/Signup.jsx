@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // ✅ navigation
 import axios from "axios";
+import { buildApiUrl } from "../services/api";
 
 const Signup = () => {
   const navigate = useNavigate(); // ✅ router hook
@@ -21,7 +22,7 @@ const Signup = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/signup",
+        buildApiUrl("/auth/signup"),
         form
       );
       alert(res.data.message);

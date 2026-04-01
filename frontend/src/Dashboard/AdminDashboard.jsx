@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { FaUsers, FaGraduationCap, FaHome, FaUserCircle, FaBars } from "react-icons/fa";
+import { buildApiUrl } from "../services/api";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({});
@@ -36,7 +37,7 @@ export default function AdminDashboard() {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/admin/analytics", {
+      const res = await axios.get(buildApiUrl("/admin/analytics"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setStats(res.data);
@@ -49,7 +50,7 @@ export default function AdminDashboard() {
 
   const loadAdmissions = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/admissions", {
+      const res = await axios.get(buildApiUrl("/admin/admissions"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAdmissions(res.data);
@@ -60,7 +61,7 @@ export default function AdminDashboard() {
 
   const loadUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/users", {
+      const res = await axios.get(buildApiUrl("/admin/users"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(
@@ -78,7 +79,7 @@ export default function AdminDashboard() {
 
   const loadAdminProfile = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/profile", {
+      const res = await axios.get(buildApiUrl("/admin/profile"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAdmin(res.data);
@@ -91,7 +92,7 @@ export default function AdminDashboard() {
   const updateStatus = async (id, status) => {
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/admin/admissions/${id}/status`,
+        buildApiUrl(`/admin/admissions/${id}/status`),
         { admissionStatus: status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -107,7 +108,7 @@ export default function AdminDashboard() {
   const downloadPDF = async (id) => {
   try {
     const response = await axios.get(
-      `http://localhost:5000/api/admin/admissions/${id}/download`,
+      buildApiUrl(`/admin/admissions/${id}/download`),
       {
         responseType: "blob",
         headers: {

@@ -40,9 +40,9 @@ const Event = () => {
   ];
 
   const gallery = [
-    "https://i.ibb.co/pn7c6M7/event1.jpg",
-    "https://i.ibb.co/k0K1ck5/event2.jpg",
-    "https://i.ibb.co/kBZdHn3/event3.jpg",
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&auto=format&fit=crop",
   ];
 
   return (

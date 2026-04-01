@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaUserCircle, FaFilePdf } from "react-icons/fa";
+import { buildApiUrl } from "../services/api";
 
 export default function UserDashboard() {
   const token = localStorage.getItem("token");
@@ -34,7 +35,7 @@ export default function UserDashboard() {
   // ===== Load User Profile =====
   const loadUserProfile = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/user/profile", {
+      const res = await axios.get(buildApiUrl("/auth/me"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(res.data);
@@ -51,11 +52,16 @@ export default function UserDashboard() {
   // ===== Load My Admission =====
   const loadMyAdmission = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admission/my", {
+      const res = await axios.get(buildApiUrl("/admission/my"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAdmission(res.data);
     } catch (error) {
+      if (error.response?.status === 404) {
+        setAdmission(null);
+        return;
+      }
+
       console.error("Failed to load admission:", error);
     }
   };
@@ -82,7 +88,7 @@ export default function UserDashboard() {
       if (files.twelfthMarksheet) form.append("twelfthMarksheet", files.twelfthMarksheet);
       if (files.idProof) form.append("idProof", files.idProof);
 
-      const res = await axios.post("http://localhost:5000/api/admission", form, {
+      const res = await axios.post(buildApiUrl("/admission"), form, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       });
 
@@ -99,7 +105,7 @@ export default function UserDashboard() {
   const downloadPDF = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/admission/${admission._id}/download`,
+        buildApiUrl(`/admission/letter/${admission._id}`),
         { responseType: "blob", headers: { Authorization: `Bearer ${token}` } }
       );
       const url = window.URL.createObjectURL(new Blob([response.data]));
