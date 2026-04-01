@@ -20,12 +20,21 @@ const defaultAllowedOrigins = [
 ].map(normalizeOrigin);
 
 const allowedOrigins = new Set([
+<<<<<<< HEAD
   ...defaultAllowedOrigins,
   ...[process.env.CORS_ORIGINS, process.env.FRONTEND_URL]
     .filter(Boolean)
     .flatMap((value) => value.split(","))
     .map(normalizeOrigin)
     .filter(Boolean)
+=======
+    ...defaultAllowedOrigins,
+    ...[process.env.CORS_ORIGINS, process.env.FRONTEND_URL]
+      .filter(Boolean)
+      .flatMap((value) => value.split(","))
+      .map(normalizeOrigin)
+      .filter(Boolean)
+>>>>>>> new-feature
 ]);
 
 const previewHostSuffixes = [".vercel.app", ".netlify.app", ".onrender.com"];
@@ -74,6 +83,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admission", admissionRoutes);
 app.use("/api/admin", adminRoutes); // ✅ IMPORTANT LINE
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> new-feature
 app.get("/", (req, res) => {
   res.send("MERN Backend is Live 🚀");
 });

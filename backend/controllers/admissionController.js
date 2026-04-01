@@ -1,5 +1,6 @@
 const Admission = require("../models/Admission");
-const PDFDocument = require("pdfkit");
+const { pipeAdmissionPdf } = require("../utils/admissionPdf");
+
 
 
 /* APPLY ADMISSION */
@@ -57,27 +58,14 @@ exports.generatePDF = async (req, res) => {
     return res.status(400).json({ msg: "Admission not approved" });
   }
 
-  const doc = new PDFDocument();
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=admission_${admission.name}.pdf`
-  );
-
-  doc.pipe(res);
-  doc.fontSize(18).text("OFFICIAL ADMISSION LETTER", { align: "center" });
-  doc.moveDown();
-  doc.fontSize(12).text(`Name: ${admission.name}`);
-  doc.text(`Email: ${admission.email}`);
-  doc.text(`Course: ${admission.course}`);
-  doc.text(`Status: ${admission.admissionStatus}`);
-  doc.text(`Date: ${new Date().toDateString()}`);
-  doc.moveDown();
-  doc.text("Congratulations! Your admission has been approved.");
-  doc.moveDown();
-  doc.text("Authorized Signatory");
-  doc.text("Admin Office");
-  doc.end();
+  pipeAdmissionPdf(res, admission, {
+    institutionName: "Global Tech Institute",
+    title: "Official Admission Letter",
+    subtitle: "Admissions Office | Global Tech Institute",
+    bodyIntro: `Dear ${admission.name || "Student"}, we are delighted to confirm your admission to the ${admission.course || "selected program"} program at Global Tech Institute for the upcoming academic session.`,
+    note: "Keep this document for onboarding, fee verification, and campus reporting.",
+    showApprovalMessage: true,
+  });
 };
 
 /* GET MY ADMISSION */
