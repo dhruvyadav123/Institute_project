@@ -1,6 +1,7 @@
 // src/pages/Analytics.jsx
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { buildApiUrl } from "../services/api";
 
 const Analytics = () => {
   const [stats, setStats] = useState({});
@@ -8,7 +9,7 @@ const Analytics = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/admin/analytics", {
+      .get(buildApiUrl("/admin/analytics"), {
         headers: {
           Authorization: `Bearer ${token}`
         }

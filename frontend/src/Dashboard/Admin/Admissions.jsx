@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "../../layouts/AdminLayout";
+import { buildApiUrl } from "../../services/api";
 
 export default function Admissions() {
   const [admissions, setAdmissions] = useState([]);
@@ -11,7 +12,7 @@ export default function Admissions() {
   }, []);
 
   const loadAdmissions = async () => {
-    const res = await axios.get("http://localhost:5000/api/admission/all", {
+    const res = await axios.get(buildApiUrl("/admin/admissions"), {
       headers: { Authorization: `Bearer ${token}` },
     });
     setAdmissions(res.data);
@@ -19,7 +20,7 @@ export default function Admissions() {
 
   const updateStatus = async (id, status) => {
     await axios.put(
-      `http://localhost:5000/api/admission/${id}/status`,
+      buildApiUrl(`/admin/admissions/${id}/status`),
       { admissionStatus: status },
       { headers: { Authorization: `Bearer ${token}` } }
     );

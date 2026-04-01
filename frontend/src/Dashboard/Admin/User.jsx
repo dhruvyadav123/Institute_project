@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "../../layouts/AdminLayout";
+import { buildApiUrl } from "../../services/api";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -11,7 +12,7 @@ export default function Users() {
   }, []);
 
   const loadUsers = async () => {
-    const res = await axios.get("http://localhost:5000/api/admin/users", {
+    const res = await axios.get(buildApiUrl("/admin/users"), {
       headers: { Authorization: `Bearer ${token}` },
     });
     setUsers(res.data);

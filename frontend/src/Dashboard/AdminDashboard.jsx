@@ -9,10 +9,6 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
-<<<<<<< HEAD
-import { FaUsers, FaGraduationCap, FaHome, FaUserCircle, FaBars } from "react-icons/fa";
-import { buildApiUrl } from "../services/api";
-=======
 import {
   FaBars,
   FaEnvelope,
@@ -77,7 +73,6 @@ const StatusBadge = ({ status }) => {
     </span>
   );
 };
->>>>>>> new-feature
 
 export default function AdminDashboard() {
   const token = localStorage.getItem("token");
@@ -109,11 +104,6 @@ export default function AdminDashboard() {
     setScreenError("");
 
     try {
-<<<<<<< HEAD
-      setLoading(true);
-      const res = await axios.get(buildApiUrl("/admin/analytics"), {
-        headers: { Authorization: `Bearer ${token}` },
-=======
       const [statsRes, usersRes, admissionsRes, profileRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/admin/analytics`, authConfig),
         axios.get(`${API_BASE_URL}/admin/users`, authConfig),
@@ -126,7 +116,6 @@ export default function AdminDashboard() {
         totalAdmissions: statsRes.data?.totalAdmissions || 0,
         approved: statsRes.data?.approved || 0,
         pending: statsRes.data?.pending || 0,
->>>>>>> new-feature
       });
       setUsers(
         [...(usersRes.data || [])].sort((a, b) =>
@@ -149,55 +138,6 @@ export default function AdminDashboard() {
     }
   };
 
-<<<<<<< HEAD
-  const loadAdmissions = async () => {
-    try {
-      const res = await axios.get(buildApiUrl("/admin/admissions"), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAdmissions(res.data);
-    } catch (error) {
-      console.error("Failed to load admissions:", error);
-    }
-  };
-
-  const loadUsers = async () => {
-    try {
-      const res = await axios.get(buildApiUrl("/admin/users"), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(
-        res.data.map((u) => ({
-          name: u.name,
-          email: u.email,
-          role: u.role,
-          _id: u._id,
-        }))
-      );
-    } catch (error) {
-      console.error("Failed to load users:", error);
-    }
-  };
-
-  const loadAdminProfile = async () => {
-    try {
-      const res = await axios.get(buildApiUrl("/admin/profile"), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAdmin(res.data);
-    } catch (error) {
-      console.error("Failed to load profile:", error);
-    }
-  };
-
-  // ===== Actions =====
-  const updateStatus = async (id, status) => {
-    try {
-      const res = await axios.put(
-        buildApiUrl(`/admin/admissions/${id}/status`),
-        { admissionStatus: status },
-        { headers: { Authorization: `Bearer ${token}` } }
-=======
   const updateStatus = async (admissionId, admissionStatus) => {
     const actionKey = `${admissionId}:${admissionStatus}`;
     setStatusLoadingId(actionKey);
@@ -207,7 +147,6 @@ export default function AdminDashboard() {
         `${API_BASE_URL}/admin/admissions/${admissionId}/status`,
         { admissionStatus },
         authConfig
->>>>>>> new-feature
       );
       setFeedback({
         type: "success",
@@ -225,33 +164,6 @@ export default function AdminDashboard() {
     }
   };
 
-<<<<<<< HEAD
-  const downloadPDF = async (id) => {
-  try {
-    const response = await axios.get(
-      buildApiUrl(`/admin/admissions/${id}/download`),
-      {
-        responseType: "blob",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "admission.pdf");
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } catch (error) {
-    console.error(error);
-    alert("Admin PDF download failed");
-  }
-};
-
-=======
   const downloadPDF = async (admission) => {
     setDownloadingId(admission._id);
 
@@ -285,7 +197,6 @@ export default function AdminDashboard() {
       setDownloadingId("");
     }
   };
->>>>>>> new-feature
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -293,27 +204,11 @@ export default function AdminDashboard() {
     window.location.href = "/login";
   };
 
-<<<<<<< HEAD
-  // ===== Dashboard Chart Data =====
-  const data = [
-    { name: "Users", value: stats.totalUsers || 0 },
-    { name: "Admissions", value: stats.totalAdmissions || 0 },
-    { name: "Approved", value: stats.approved || 0 },
-    { name: "Pending", value: stats.pending || 0 },
-  ];
-
-  const cardColors = [
-    "from-pink-400 to-pink-500",
-    "from-indigo-400 to-indigo-500",
-    "from-green-400 to-green-500",
-    "from-yellow-400 to-yellow-500",
-=======
   const summaryCards = [
     { label: "Users", value: stats.totalUsers, tone: "from-sky-500 to-cyan-500" },
     { label: "Admissions", value: stats.totalAdmissions, tone: "from-violet-500 to-fuchsia-500" },
     { label: "Approved", value: stats.approved, tone: "from-emerald-500 to-teal-500" },
     { label: "Pending", value: stats.pending, tone: "from-amber-400 to-orange-500" },
->>>>>>> new-feature
   ];
 
   // ===== RENDER =====

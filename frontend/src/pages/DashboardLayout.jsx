@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaUsers, FaGraduationCap, FaHome, FaUserCircle, FaBars, FaFilePdf } from "react-icons/fa";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { buildApiUrl } from "../services/api";
 
 export default function DashboardLayout() {
   const token = localStorage.getItem("token");
@@ -31,7 +32,7 @@ export default function DashboardLayout() {
   // ===== Detect Role =====
   const checkRoleAndLoadData = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/auth/me", {
+      const res = await axios.get(buildApiUrl("/auth/me"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRole(res.data.role);
@@ -47,10 +48,10 @@ export default function DashboardLayout() {
     setLoading(true);
     try {
       const [statsRes, usersRes, admissionsRes, profileRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/admin/analytics", { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get("http://localhost:5000/api/admin/users", { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get("http://localhost:5000/api/admission/all", { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get("http://localhost:5000/api/admin/profile", { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(buildApiUrl("/admin/analytics"), { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(buildApiUrl("/admin/users"), { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(buildApiUrl("/admin/admissions"), { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(buildApiUrl("/admin/profile"), { headers: { Authorization: `Bearer ${token}` } }),
       ]);
       setStats(statsRes.data);
       setUsers(usersRes.data);
@@ -67,7 +68,7 @@ export default function DashboardLayout() {
     setUser(userProfile);
     setFormData({ ...formData, name: userProfile.name, email: userProfile.email });
     try {
-      const res = await axios.get("http://localhost:5000/api/admission/my", {
+      const res = await axios.get(buildApiUrl("/admission/my"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMyAdmission(res.data);
@@ -80,7 +81,7 @@ export default function DashboardLayout() {
   const updateStatus = async (id, status) => {
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/admission/${id}/status`,
+        buildApiUrl(`/admin/admissions/${id}/status`),
         { admissionStatus: status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -93,8 +94,13 @@ export default function DashboardLayout() {
   };
 
   const downloadPDF = async (id) => {
+    const admissionId = id || myAdmission?._id;
+    const endpoint = id
+      ? buildApiUrl(`/admin/admissions/${admissionId}/download`)
+      : buildApiUrl(`/admission/letter/${admissionId}`);
+
     try {
-      const response = await axios.get(`http://localhost:5000/api/admission/${id}/download`, {
+      const response = await axios.get(endpoint, {
         responseType: "blob",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -122,11 +128,11 @@ export default function DashboardLayout() {
       Object.keys(formData).forEach(key => form.append(key, formData[key]));
       Object.keys(files).forEach(key => files[key] && form.append(key, files[key]));
 
-      const res = await axios.post("http://localhost:5000/api/admission", form, {
+      const res = await axios.post(buildApiUrl("/admission"), form, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       });
       alert(res.data.message || "Admission applied!");
-      const myRes = await axios.get("http://localhost:5000/api/admission/my", { headers: { Authorization: `Bearer ${token}` } });
+      const myRes = await axios.get(buildApiUrl("/admission/my"), { headers: { Authorization: `Bearer ${token}` } });
       setMyAdmission(myRes.data);
     } catch (error) {
       console.error(error);

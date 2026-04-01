@@ -2,25 +2,20 @@ const User = require("../models/User");
 const Admission = require("../models/Admission");
 const { pipeAdmissionPdf } = require("../utils/admissionPdf");
 
-// ===== Users =====
 exports.getUsers = async (req, res) => {
   const users = await User.find({}, "_id name email role");
   res.json(users);
 };
 
-// ===== Admin Profile =====
 exports.getAdminProfile = async (req, res) => {
-  // sample admin
   res.json({ name: "Dhruv Yadav", email: "admin@gmail.com", dp: "" });
 };
 
-// ===== Admissions =====
 exports.getAllAdmissions = async (req, res) => {
   const admissions = await Admission.find({});
   res.json(admissions);
 };
 
-// ===== Toggle Status =====
 exports.toggleStatus = async (req, res) => {
   const { id } = req.params;
   const { admissionStatus } = req.body;
@@ -37,7 +32,6 @@ exports.toggleStatus = async (req, res) => {
   res.json({ message: `Admission ${admissionStatus}`, admission });
 };
 
-// ===== Download PDF =====
 exports.downloadAdmissionPDF = async (req, res) => {
   const admission = await Admission.findById(req.params.id);
 
@@ -45,18 +39,6 @@ exports.downloadAdmissionPDF = async (req, res) => {
     return res.status(404).json({ message: "Admission not found" });
   }
 
-<<<<<<< HEAD
-  const filePath = path.join(
-    __dirname,
-    `../uploads/admission_${admission._id}.pdf`
-  );
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ message: "PDF not generated yet" });
-  }
-
-  res.download(filePath);
-=======
   pipeAdmissionPdf(res, admission, {
     institutionName: "Global Tech Institute",
     title:
@@ -70,11 +52,8 @@ exports.downloadAdmissionPDF = async (req, res) => {
         : `This report summarizes the current admission status, submitted details, and verification records for ${admission.name || "the student"}.`,
     note: "Use this summary while reviewing documents, course choice, and approval status.",
   });
->>>>>>> new-feature
 };
 
-
-// ===== Analytics / Stats =====
 exports.getAnalytics = async (req, res) => {
   const totalUsers = await User.countDocuments();
   const totalAdmissions = await Admission.countDocuments();

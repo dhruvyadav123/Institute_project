@@ -169,13 +169,6 @@ const Event = memo(() => {
     },
   ], []);
 
-<<<<<<< HEAD
-  const gallery = [
-    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&auto=format&fit=crop",
-  ];
-=======
   // Memoized gallery data with high-quality Unsplash images
   const gallery = useMemo(() => [
     {
@@ -254,7 +247,6 @@ const Event = memo(() => {
     if (filter === "All") return events;
     return events.filter(event => event.category === filter);
   }, [filter, events]);
->>>>>>> new-feature
 
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white py-20 overflow-hidden">

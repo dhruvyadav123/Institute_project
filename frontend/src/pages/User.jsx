@@ -1,31 +1,19 @@
 // src/pages/Users.jsx
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { buildApiUrl } from "../services/api";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const token = localStorage.getItem("token");
 
   const loadUsers = async () => {
-    const res = await axios.get("http://localhost:5000/admin/users", {
+    const res = await axios.get(buildApiUrl("/admin/users"), {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
     setUsers(res.data);
-  };
-
-  const toggleStatus = async (id) => {
-    await axios.put(
-      `http://localhost:5000/admin/users/status/${id}`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
-    loadUsers(); // 🔥 auto update
   };
 
   useEffect(() => {
@@ -36,12 +24,9 @@ const Users = () => {
     <div>
       <h2>Users</h2>
 
-      {users.map(user => (
+      {users.map((user) => (
         <div key={user._id}>
-          {user.name} - {user.status}
-          <button onClick={() => toggleStatus(user._id)}>
-            Toggle Status
-          </button>
+          {user.name} - {user.role}
         </div>
       ))}
     </div>

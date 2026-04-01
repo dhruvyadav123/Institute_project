@@ -4,8 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
-
-const adminRoutes = require("./routes/adminRoutes"); // ✅ ADMIN ROUTES
+const adminRoutes = require("./routes/adminRoutes");
 const admissionRoutes = require("./routes/admissionRoutes");
 
 const app = express();
@@ -16,25 +15,16 @@ const defaultAllowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://127.0.0.1:5173",
-  "http://127.0.0.1:5174"
+  "http://127.0.0.1:5174",
 ].map(normalizeOrigin);
 
 const allowedOrigins = new Set([
-<<<<<<< HEAD
   ...defaultAllowedOrigins,
   ...[process.env.CORS_ORIGINS, process.env.FRONTEND_URL]
     .filter(Boolean)
     .flatMap((value) => value.split(","))
     .map(normalizeOrigin)
-    .filter(Boolean)
-=======
-    ...defaultAllowedOrigins,
-    ...[process.env.CORS_ORIGINS, process.env.FRONTEND_URL]
-      .filter(Boolean)
-      .flatMap((value) => value.split(","))
-      .map(normalizeOrigin)
-      .filter(Boolean)
->>>>>>> new-feature
+    .filter(Boolean),
 ]);
 
 const previewHostSuffixes = [".vercel.app", ".netlify.app", ".onrender.com"];
@@ -59,39 +49,33 @@ const isAllowedOrigin = (origin) => {
   }
 };
 
-app.use(cors({
-  origin(origin, callback) {
-    if (isAllowedOrigin(origin)) {
-      return callback(null, true);
-    }
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
 
-    return callback(new Error(`CORS blocked for origin: ${origin}`));
-  },
-  credentials: true
-}));
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
-// DB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));
 
-// ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/admission", admissionRoutes);
-app.use("/api/admin", adminRoutes); // ✅ IMPORTANT LINE
+app.use("/api/admin", adminRoutes);
 
-<<<<<<< HEAD
-=======
-
->>>>>>> new-feature
 app.get("/", (req, res) => {
-  res.send("MERN Backend is Live 🚀");
+  res.send("MERN Backend is Live");
 });
-
-
 
 const PORT = process.env.PORT || 5000;
 

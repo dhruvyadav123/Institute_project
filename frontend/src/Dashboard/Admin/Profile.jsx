@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaUserCircle } from "react-icons/fa";
 import AdminLayout from "../../layouts/AdminLayout";
+import { buildApiUrl } from "../../services/api";
 
 export default function Profile() {
   const [admin, setAdmin] = useState({});
@@ -12,7 +13,7 @@ export default function Profile() {
   }, []);
 
   const loadProfile = async () => {
-    const res = await axios.get("http://localhost:5000/api/admin/profile", {
+    const res = await axios.get(buildApiUrl("/admin/profile"), {
       headers: { Authorization: `Bearer ${token}` },
     });
     setAdmin(res.data);
